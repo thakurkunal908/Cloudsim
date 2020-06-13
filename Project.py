@@ -1,9 +1,13 @@
 
 
 """
+command to run Algoritms in CMD
 C:\\CloudsimSetup\\cloudsim-3.0.3>javac -classpath jars\\cloudsim-3.0.3.jar; examples\\org\\cloudbus\\cloudsim\\examples\\simulation.java
 
 C:\\CloudsimSetup\\cloudsim-3.0.3>java -classpath jars\\cloudsim-3.0.3.jar;examples org.cloudbus.cloudsim.examples.simulation
+
+
+To be ignored
 """
 
 
