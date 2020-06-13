@@ -69,7 +69,6 @@ public class CloudSimExample6 {
 		LinkedList<Cloudlet> list = new LinkedList<Cloudlet>();
 
 		//cloudlet parameters
-		long length = 1000;
 		long fileSize = 300;
 		long outputSize = 300;
 		int pesNumber = 1;
@@ -87,20 +86,78 @@ public class CloudSimExample6 {
 		return list;
 	}
 
+
+	    private static int getNum(ArrayList<Integer> v)  
+    {  
+        // Size of the vector  
+        int n = v.size();  
+      
+        // Make sure the number is within  
+        // the index range  
+        int index = (int)(Math.random() * n);  
+      
+        // Get random number from the vector  
+        int num = v.get(index);  
+      
+        // Remove the number from the vector  
+        v.set(index, v.get(n - 1)); 
+        v.remove(n - 1);  
+      
+        // Return the removed number  
+        return num;  
+    }  
+      
+    // Function to generate n  
+    // non-repeating random numbers  
+    private static ArrayList<Integer> generateRandom(int n)  
+    {  
+        ArrayList<Integer> v = new ArrayList<Integer>(n);  
+      	ArrayList<Integer> ans = new ArrayList<Integer>(n);
+        // Fill the vector with the values  
+        // 1, 2, 3, ..., n  
+        for (int i = 0; i < n; i++)  
+            v.add(i + 1);  
+      
+        // While vector has elements  
+        // get a random number from the vector and print it  
+        while (v.size() > 0)  
+        {  
+            ans.add(getNum(v)-1);  
+        }
+        return ans;  
+    }  
+
+
 	private static ArrayList<Integer> createChromosome(int length,int range)
 	{
 		ArrayList<Integer> chromosome = new ArrayList<Integer>();
+		ArrayList<Integer> part = new ArrayList<Integer>();
 		Random rand = new Random();
+		int c = 0;
+		int remainder = length%range;
+		int division = (length-remainder)/range;
+		// System.out.println("Divison"+division+"remainder"+remainder);
+		for(int i = 0;i<division;i++)
+		{
+			part = generateRandom(range);
+			for(int j=0;j<part.size();j++)
+			{
+				chromosome.add(part.get(j));
+				c = c+1;
+			}
+		}
+
 		int temp;
-		for(int i=0;i<length;i++)
+
+		for(int i=c;i<length;i++)
 		{
 			temp = rand.nextInt(range);
 			chromosome.add(temp);
 		}
 		return chromosome;
 	}
-
-	private static double calculateFitness(ArrayList<Integer> chromosome,int vmCount,double length,double filesize,int pe,int mips,int bw)
+	
+	private static double calculateFitness(ArrayList<Integer> chromosome,int vmCount,int[] length,double filesize,int pe,int mips,int bw)
 	{
 		double fitness=0;
 		double[] vm  = new double[vmCount];
@@ -109,27 +166,45 @@ public class CloudSimExample6 {
 		for(int i=0;i<chromosome.size();i++)
 		{
 			vmId = chromosome.get(i);
-			fitness = (length/(pe*mips))+(filesize/(bw*125000));
+			fitness = (length[i]/1000.00)+(300.00/125000000);
 			vm[vmId] = vm[vmId] + fitness; 
 		}
-		max = vm[0];
-        for (int i = 1; i < vmCount; i++) 
+		max = 0;
+        for (int i = 0; i < vmCount; i++) 
         {
             if (vm[i] > max)
             {
                 max = vm[i]; 
             }
         }
+        for(int i=0;i<vmCount;i++)
+        {
+        	System.out.print(vm[i]+" ");
+        	if(i==vmCount-1)
+        	{
+                System.out.print("--->");       		
+        	}
+        }
+
+        for(int i=0;i<chromosome.size();i++)
+        {
+        	System.out.print(chromosome.get(i)+" ");
+        	if(i==chromosome.size()-1)
+        	{
+                System.out.println("");       		
+        	}
+        }
+         System.out.print("");
 		return max;
 	}
 	
-	private static ArrayList<Integer>SinglePointCrossover(ArrayList<Integer> chromosomeOne,ArrayList<Integer> chromosomeTwo)
+	private static ArrayList<Integer>SinglePointCrossover(ArrayList<Integer> chromosomeOne,ArrayList<Integer> chromosomeTwo,int vmcount)
 	{
 		ArrayList<Integer> chromosome = new ArrayList<Integer>();
 		int size = chromosomeOne.size();
 		for(int i=0;i<size;i++)
 		{
-			if(i<(int)size/2)
+			if(i<vmcount)
 			{
 				chromosome.add(chromosomeOne.get(i));
 			}
@@ -299,7 +374,7 @@ public class CloudSimExample6 {
 			int vmSize = vmlist.size();
 			
 			// Creating initial Population of chromosomes 
-			for(int i=0;i<200;i++)
+			for(int i=0;i<100;i++)
 			{
 				chromosome = createChromosome(num_cloudlet,num_vm);
 				chromosomeList.add(chromosome);
@@ -309,7 +384,7 @@ public class CloudSimExample6 {
 			double length;
 			double filesize;
 			int indexofFittestChromosome = 0;
-			int generation=15;
+			int generation=10;
 			// Running the algorithm for 20 generations
 			for(int count=1;count<=generation;count++)
 			{
@@ -318,13 +393,27 @@ public class CloudSimExample6 {
 				for(int i=0;i<num_cloudlet;i++)
 				{
 					chromosome = chromosomeList.get(i);
-					length = cloudletList.get(i).getCloudletLength();
-					filesize = cloudletList.get(i).getCloudletFileSize();
-					fitness = calculateFitness(chromosome,vmSize,length,filesize,1,1000,1000);
+					fitness = calculateFitness(chromosome,vmSize,cloudletLength,300,1,1000,1000);
 					fitnessList.add(fitness);
 				}
 				System.out.println("Fittest Solution of Generation "+count+" is having makespan of "+Collections.min(fitnessList));
-				indexofFittestChromosome = fitnessList.indexOf(Collections.min(fitnessList));
+				
+				double minfitness=fitnessList.get(0);
+
+				for(int i = 0;i<fitnessList.size();i++)
+				{
+					//System.out.print(fitnessList.get(i)+" ");
+					if(fitnessList.get(i)<minfitness)
+					{
+						minfitness=fitnessList.get(i);
+						indexofFittestChromosome=i;
+					}
+					// if(i==fitnessList.size()-1)
+					// {
+					// 	System.out.println("");
+					// }
+				}
+
 				for (int i = 0; i < chromosomeList.get(indexofFittestChromosome).size(); i++) {
 					System.out.print(chromosomeList.get(indexofFittestChromosome).get(i)+" ");
 					if(i==chromosomeList.get(indexofFittestChromosome).size()-1)
@@ -342,14 +431,15 @@ public class CloudSimExample6 {
 			            fitnessList.remove(index);
 			            chromosomeList.remove(index);
 			        } 			
-					
+
 					// Creating offsprings
 					//Creating a container to store the offsprings
 					ArrayList<ArrayList> offspringList = new ArrayList<ArrayList>();
 					
 					for(int i = 0;i<chromosomeList.size();i++)
 					{
-						offspringList.add(SinglePointCrossover(chromosomeList.get(rand.nextInt(chromosomeList.size())),chromosomeList.get(rand.nextInt(chromosomeList.size()))));
+						offspringList.add(SinglePointCrossover(chromosomeList.get(rand.nextInt(chromosomeList.size())),chromosomeList.get(rand.nextInt(chromosomeList.size())),num_vm));
+						//offspringList.add(SinglePointCrossover(chromosomeList.get(indexofFittestChromosome),chromosomeList.get(rand.nextInt(chromosomeList.size()))));
 					}
 					
 					// Mutating the offspring chromosome
@@ -362,6 +452,7 @@ public class CloudSimExample6 {
 						chromosomeList.addAll(offspringList);
 						offspringList.clear();
 						offspringList = null;
+						fitnessList.clear();
 				}
 			}
 			Cloudlet c;
@@ -557,7 +648,7 @@ public class CloudSimExample6 {
 						+ dft.format(cloudlet.getProcessingCost()));
 								timetaken[cloudlet.getCloudletId()] = cloudlet.getFinishTime()-cloudlet.getExecStartTime();
 								totalCost = totalCost + (cloudlet.getProcessingCost());
-				vm[cloudlet.getVmId()]=vm[cloudlet.getVmId()] + cloudlet.getActualCPUTime();
+				vm[cloudlet.getVmId()]=vm[cloudlet.getVmId()] + (cloudlet.getFinishTime()-cloudlet.getExecStartTime());
 			}
 		}
 		Log.printLine("\n\n\nTime Taken \n\n\n");
