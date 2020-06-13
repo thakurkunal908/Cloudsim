@@ -1,7 +1,7 @@
-# Implementation of Various Taskscheduling algorithms in cloudsim for scheduling Cloudlets.
+# Implementation of Various Taskscheduling algorithms in cloudsim for scheduling Cloudlets (Cloudsim 3.0.3).
 
-* ShortestFirst.java is an implementation of Shortest Job First Task Scheduling Algorithm in clousim.
-* Genetic.java is an implementation of Genetic Task Scheduling Algorithm in clousim.
+* ShortestFirst.java is an implementation of Shortest Job First Task Scheduling Algorithm in cloudsim.
+* Genetic.java is an implementation of Genetic Task Scheduling Algorithm in cloudsim.
 * Project.py is a python GUI Developed for running and comparing the above Implemented Algorithms in cloudsim.
 * input.py is python script to generate the input file for the above Algorithms for testing. 
 
